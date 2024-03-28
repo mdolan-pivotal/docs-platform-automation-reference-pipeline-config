@@ -1,7 +1,7 @@
 ## Platform Automation Reference Pipeline Configs
 
 These configs are used
-in the [Platform Automation reference pipeline.](http://docs.pivotal.io/platform-automation/v3.0/pipeline/multiple-products.html)
+in the [Platform Automation reference pipeline.](https://docs.vmware.com/en/Platform-Automation-Toolkit-for-VMware-Tanzu/5.1/vmware-automation-toolkit/GUID-docs-pipelines-multiple-products.html)
 You may clone this repository
 and use it as a reference for your own configurations.
 
