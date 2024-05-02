@@ -149,7 +149,7 @@ jobs:
     - in_parallel:
       - get: platform-automation-image
         params:
-          globs: [".*image-(.*).tgz"]
+          globs: ["*image*tgz"]
           unpack: true
       - get: platform-automation-tasks
         params:
@@ -178,7 +178,7 @@ jobs:
   - in_parallel:
     - get: platform-automation-image
       params:
-        globs: [".*image-(.*).tgz"]
+        globs: ["*image*tgz"]
         unpack: true
     - get: one-time-trigger
       trigger: true
@@ -296,7 +296,7 @@ jobs:
       trigger: true
     - get: platform-automation-image
       params:
-        globs: [".*image-(.*).tgz"]
+        globs: ["*image*tgz"]
         unpack: true
     - get: platform-automation-tasks
       params:
@@ -336,7 +336,7 @@ jobs:
   - in_parallel:
     - get: platform-automation-image
       params:
-        globs: [".*image-(.*).tgz"]
+        globs: ["*image*tgz"]
         unpack: true
       trigger: true
     - get: platform-automation-tasks
@@ -421,7 +421,7 @@ jobs:
   - in_parallel:
     - get: platform-automation-image
       params:
-        globs: [".*image-(.*).tgz"]
+        globs: ["*image*tgz"]
         unpack: true
       trigger: true
       passed: [ "upgrade-opsman" ]
@@ -477,7 +477,7 @@ jobs:
   - in_parallel:
     - get: platform-automation-image
       params:
-        globs: [".*image-(.*).tgz"]
+        globs: ["*image*tgz"]
         unpack: true
       trigger: true
       passed: [ "upgrade-opsman" ]
@@ -538,7 +538,7 @@ jobs:
     - in_parallel:
         - get: platform-automation-image
           params:
-            globs: [".*image-(.*).tgz"]
+            globs: ["*image*tgz"]
             unpack: true
           trigger: true
           passed: [ "upgrade-opsman" ]
@@ -586,7 +586,7 @@ jobs:
     - in_parallel:
         - get: platform-automation-image
           params:
-            globs: [".*image-(.*).tgz"]
+            globs: ["*image*tgz"]
             unpack: true
           trigger: true
           passed: [ "upgrade-opsman" ]
@@ -625,7 +625,7 @@ jobs:
     - in_parallel:
         - get: platform-automation-image
           params:
-            globs: [".*image-(.*).tgz"]
+            globs: ["*image*tgz"]
             unpack: true
           trigger: true
           passed: [ "upgrade-opsman" ]
@@ -664,7 +664,7 @@ jobs:
   - in_parallel:
     - get: platform-automation-image
       params:
-        globs: [".*image-(.*).tgz"]
+        globs: ["*image*tgz"]
         unpack: true
       passed:
       - download-upload-and-stage-pks
@@ -700,7 +700,7 @@ jobs:
     - in_parallel:
       - get: platform-automation-image
         params:
-          globs: [".*image-(.*).tgz"]
+          globs: ["*image*tgz"]
           unpack: true
         passed:
           - download-upload-and-stage-tas
@@ -732,7 +732,7 @@ jobs:
     - in_parallel:
       - get: platform-automation-image
         params:
-          globs: [".*image-(.*).tgz"]
+          globs: ["*image*tgz"]
           unpack: true
         passed:
           - download-upload-and-stage-healthwatch
@@ -763,7 +763,7 @@ jobs:
     - in_parallel:
       - get: platform-automation-image
         params:
-          globs: [".*image-(.*).tgz"]
+          globs: ["*image*tgz"]
           unpack: true
         passed:
           - download-upload-and-stage-healthwatch-pas-exporter
@@ -794,7 +794,7 @@ jobs:
     - in_parallel:
       - get: platform-automation-image
         params:
-          globs: [".*image-(.*).tgz"]
+          globs: ["*image*tgz"]
           unpack: true
         passed:
           - download-upload-and-stage-healthwatch-pks-exporter
@@ -825,7 +825,7 @@ jobs:
   - in_parallel:
     - get: platform-automation-image
       params:
-        globs: [".*image-(.*).tgz"]
+        globs: ["*image*tgz"]
         unpack: true
       passed:
       - configure-pks
@@ -888,7 +888,7 @@ jobs:
   - in_parallel:
     - get: platform-automation-image
       params:
-        globs: [".*image-(.*).tgz"]
+        globs: ["*image*tgz"]
         unpack: true
       passed:
       - configure-pks
@@ -922,11 +922,11 @@ jobs:
   - in_parallel:
     - get: telemetry-collector-binary
       params:
-        globs: [".*telemetry-(.*).tgz"]
+        globs: ["*telemetry*tgz"]
         unpack: true
     - get: platform-automation-image
       params:
-        globs: [".*image-(.*).tgz"]
+        globs: ["*image*tgz"]
         unpack: true
       passed:
       - apply-product-changes
@@ -968,7 +968,7 @@ jobs:
         trigger: true
       - get: platform-automation-image
         params:
-          globs: [".*image-(.*).tgz"]
+          globs: ["*image*tgz"]
           unpack: true
       - get: platform-automation-tasks
         params:
@@ -993,7 +993,7 @@ jobs:
     - in_parallel:
       - get: platform-automation-image
         params:
-          globs: [".*image-(.*).tgz"]
+          globs: ["*image*tgz"]
           unpack: true
         passed:
           - apply-product-changes
@@ -1029,7 +1029,7 @@ jobs:
     - in_parallel:
       - get: platform-automation-image
         params:
-          globs: [".*image-(.*).tgz"]
+          globs: ["*image*tgz"]
           unpack: true
       - get: platform-automation-tasks
         params:
@@ -1070,7 +1070,7 @@ jobs:
     - in_parallel:
         - get: platform-automation-image
           params:
-            globs: [".*image-(.*).tgz"]
+            globs: ["*image*tgz"]
             unpack: true
         - get: platform-automation-tasks
           params:
@@ -1094,7 +1094,7 @@ jobs:
     - in_parallel:
         - get: platform-automation-image
           params:
-            globs: [".*image-(.*).tgz"]
+            globs: ["*image*tgz"]
             unpack: true
           passed:
             - create-root-ca
@@ -1127,7 +1127,7 @@ jobs:
     - in_parallel:
         - get: platform-automation-image
           params:
-            globs: [".*image-(.*).tgz"]
+            globs: ["*image*tgz"]
             unpack: true
           passed:
             - apply-new-ca
@@ -1162,7 +1162,7 @@ jobs:
     - in_parallel:
         - get: platform-automation-image
           params:
-            globs: [".*image-(.*).tgz"]
+            globs: ["*image*tgz"]
             unpack: true
           passed:
             - activate-new-ca-and-regenerate-certs
@@ -1195,7 +1195,7 @@ jobs:
     - in_parallel:
         - get: platform-automation-image
           params:
-            globs: [".*image-(.*).tgz"]
+            globs: ["*image*tgz"]
             unpack: true
           passed:
             - apply-certificates
