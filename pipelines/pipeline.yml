@@ -18,8 +18,8 @@ groups:
     - configure-tas
     - apply-product-changes
     - run-tas-smoketest-errand
-    - collect-telemetry
     - stage-configure-apply-telemetry
+#    - collect-telemetry
   name: reference-pipeline
 - jobs:
     - create-root-ca
@@ -37,64 +37,82 @@ resource_types:
   source:
     repository: concourse/s3-resource
     tag: 1.2.1-ubuntu
-
+- name: pivnet
+  type: docker-image
+  source:
+    repository: pivotalcf/pivnet-resource
+    tag: latest-final
 resources:
-- name: platform-automation-tasks
-  type: s3-with-arn
+- name: platform-automation
+  type: pivnet
   source:
-    access_key_id: ((s3_with_role.access_key_id))
-    secret_access_key: ((s3_with_role.secret_access_key))
-    aws_role_arn: ((s3_with_role.role_arn))
-    region_name: ((s3_region_name))
-    bucket: ((s3_pivnet_products_bucket))
-    regexp: .*tasks-(.*).zip
+    product_slug: platform-automation
+    api_token: ((pivnet-refresh-token))
 
-- name: platform-automation-image
-  type: s3-with-arn
-  source:
-    access_key_id: ((s3_with_role.access_key_id))
-    secret_access_key: ((s3_with_role.secret_access_key))
-    aws_role_arn: ((s3_with_role.role_arn))
-    region_name: ((s3_region_name))
-    bucket: ((s3_pivnet_products_bucket))
-    regexp: .*image-(.*).tgz
-
-- name: telemetry-collector-binary
-  type: s3-with-arn
-  source:
-    access_key_id: ((s3_with_role.access_key_id))
-    secret_access_key: ((s3_with_role.secret_access_key))
-    aws_role_arn: ((s3_with_role.role_arn))
-    region_name: ((s3_region_name))
-    bucket: ((s3_pivnet_products_bucket))
-    regexp: .*telemetry-(.*).tgz
-# code_snippet reference-resources-s3 end yaml
+#- name: platform-automation-tasks
+#  type: s3-with-arn
+#  source:
+#    access_key_id: ((s3_with_role.access_key_id))
+#    secret_access_key: ((s3_with_role.secret_access_key))
+#    aws_role_arn: ((s3_with_role.role_arn))
+#    region_name: ((s3_region_name))
+#    bucket: ((s3_pivnet_products_bucket))
+#    regexp: .*tasks-(.*).zip
+#
+#- name: platform-automation-image
+#  type: s3-with-arn
+#  source:
+#    access_key_id: ((s3_with_role.access_key_id))
+#    secret_access_key: ((s3_with_role.secret_access_key))
+#    aws_role_arn: ((s3_with_role.role_arn))
+#    region_name: ((s3_region_name))
+#    bucket: ((s3_pivnet_products_bucket))
+#    regexp: .*image-(.*).tgz
+#
+#- name: telemetry-collector-binary
+#  type: s3-with-arn
+#  source:
+#    access_key_id: ((s3_with_role.access_key_id))
+#    secret_access_key: ((s3_with_role.secret_access_key))
+#    aws_role_arn: ((s3_with_role.role_arn))
+#    region_name: ((s3_region_name))
+#    bucket: ((s3_pivnet_products_bucket))
+#    regexp: .*telemetry-(.*).tgz
+## code_snippet reference-resources-s3 end yaml
 
 # code_snippet export-installation-resource-usage start yaml
 - name: installation
-  type: s3-with-arn
-  source:
-    access_key_id: ((s3_with_role.access_key_id))
-    secret_access_key: ((s3_with_role.secret_access_key))
-    aws_role_arn: ((s3_with_role.role_arn))
-    region_name: ((s3_region_name))
-    bucket: ((s3_installation_bucket))
-    regexp: ((foundation))-installation-(.*).zip
+  type: pivnet #placeholder till I get the scp resource working
+#  type: s3-with-arn
+#  source:
+#    access_key_id: ((s3_with_role.access_key_id))
+#    secret_access_key: ((s3_with_role.secret_access_key))
+#    aws_role_arn: ((s3_with_role.role_arn))
+#    region_name: ((s3_region_name))
+#    bucket: ((s3_installation_bucket))
+#    regexp: ((foundation))-installation-(.*).zip
 # code_snippet export-installation-resource-usage end
 
 # code_snippet resources-configurations start yaml
 # VM state and foundation configuration
+#- name: state
+#  type: s3-with-arn
+#  source:
+#    access_key_id: ((s3_with_role.access_key_id))
+#    secret_access_key: ((s3_with_role.secret_access_key))
+#    aws_role_arn: ((s3_with_role.role_arn))
+#    bucket: ((s3_foundation_state_bucket))
+#    region_name: ((s3_region_name))
+#    versioned_file: state-((foundation)).yml
+#    initial_content_text: '{}'
+#    initial_version: 'empty-start'
+# state
 - name: state
-  type: s3-with-arn
+  type: git
   source:
-    access_key_id: ((s3_with_role.access_key_id))
-    secret_access_key: ((s3_with_role.secret_access_key))
-    aws_role_arn: ((s3_with_role.role_arn))
-    bucket: ((s3_foundation_state_bucket))
-    region_name: ((s3_region_name))
-    versioned_file: state-((foundation)).yml
-    initial_content_text: '{}'
-    initial_version: 'empty-start'
+    private_key: ((docs-ref-pipeline-repo-key.private_key))
+    uri: ((docs-ref-pipeline-repo-uri))
+    branch: develop
 
 # configurations
 - name: configuration
@@ -107,11 +125,11 @@ resources:
 
 # code_snippet resources-triggers start yaml
 # triggers used to have jobs do something in a timely manner
-- name: one-time-trigger
-  type: time
-  source:
-    interval: 999999h
-
+#- name: one-time-trigger
+#  type: time
+#  source:
+#    interval: 999999h
+#
 - name: daily-trigger
   type: time
   source:
@@ -142,18 +160,23 @@ prepare-image: &prepare-image
     CA_CERTS: ((opsman-ssl.ca))
 # code_snippet prepare-image-usage end yaml
 # code_snippet reference-jobs start yaml
+get-pai-and-pat: &get-pai-and-pat
+  - get: platform-automation-image
+    resource: platform-automation
+    params:
+      unpack: true
+      globs: ["*image*.tgz"]
+  - get: platform-automation-tasks
+    resource: platform-automation
+    params:
+      unpack: true
+      globs: ["*tasks*.zip"]
+
 jobs:
 - name: test-platform-automation
   serial: true
   plan:
-    - in_parallel:
-      - get: platform-automation-image
-        params:
-          unpack: true
-      - get: platform-automation-tasks
-        params:
-          unpack: true
-      - get: configuration
+    - in_parallel:  *get-pai-and-pat
     # code_snippet test-interpolate-usage start yaml
     - task: test-interpolate
       image: platform-automation-image
@@ -174,17 +197,9 @@ jobs:
   serial: true
   serial_groups: [ install ]
   plan:
-  - in_parallel:
-    - get: platform-automation-image
-      params:
-        unpack: true
-    - get: one-time-trigger
-      trigger: true
-    - get: platform-automation-tasks
-      params:
-        unpack: true
-    - get: configuration
-    - get: state
+  - in_parallel:  *get-pai-and-pat
+  - get: configuration
+  - get: state
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
@@ -285,18 +300,13 @@ jobs:
   serial_groups: [ install ]
   serial: true
   plan:
+  - in_parallel:  *get-pai-and-pat
   - in_parallel:
     - get: state
-      passed: [ install-opsman ]
+    - get: configuration
+      passed: ["install-opsman" ]
     - get: daily-trigger
       trigger: true
-    - get: platform-automation-image
-      params:
-        unpack: true
-    - get: platform-automation-tasks
-      params:
-        unpack: true
-    - get: configuration
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
@@ -328,18 +338,12 @@ jobs:
   serial: true
   serial_groups: [ install ]
   plan:
+  - in_parallel:  *get-pai-and-pat
   - in_parallel:
-    - get: platform-automation-image
-      params:
-        unpack: true
-      trigger: true
-    - get: platform-automation-tasks
-      params:
-        unpack: true
     - get: installation
       passed: [ export-installation ]
-    - get: configuration
     - get: state
+    - get: configuration
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
@@ -410,16 +414,9 @@ jobs:
   serial: true
   serial_groups: [ products ]
   plan:
-  - in_parallel:
-    - get: platform-automation-image
-      params:
-        unpack: true
-      trigger: true
-      passed: [ "upgrade-opsman" ]
-    - get: platform-automation-tasks
-      params:
-        unpack: true
-    - get: configuration
+  - in_parallel:  *get-pai-and-pat
+  - get: configuration
+    passed: [ "upgrade-opsman" ]
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
@@ -469,16 +466,9 @@ jobs:
   serial: true
   serial_groups: [ products ]
   plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          trigger: true
-          passed: [ "upgrade-opsman" ]
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
+    - in_parallel:  *get-pai-and-pat
+    - get: configuration
+      passed: [ "upgrade-opsman" ]
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: download-healthwatch
@@ -515,16 +505,9 @@ jobs:
   serial: true
   serial_groups: [ products ]
   plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          trigger: true
-          passed: [ "upgrade-opsman" ]
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
+    - in_parallel:  *get-pai-and-pat
+    - get: configuration
+      passed: [ "upgrade-opsman" ]
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: download-healthwatch
@@ -552,17 +535,9 @@ jobs:
   serial: true
   serial_groups: [ install ]
   plan:
-    - in_parallel:
-      - get: platform-automation-image
-        params:
-          unpack: true
-        passed:
-          - download-upload-and-stage-tas
-        trigger: true
-      - get: platform-automation-tasks
-        params:
-          unpack: true
-      - get: configuration
+    - in_parallel:  *get-pai-and-pat
+    - get: configuration
+      passed: ["download-upload-and-stage-tas"]
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: configure-tas
@@ -583,17 +558,9 @@ jobs:
   serial: true
   serial_groups: [ install ]
   plan:
-    - in_parallel:
-      - get: platform-automation-image
-        params:
-          unpack: true
-        passed:
-          - download-upload-and-stage-healthwatch
-        trigger: true
-      - get: platform-automation-tasks
-        params:
-          unpack: true
-      - get: configuration
+    - in_parallel:  *get-pai-and-pat
+    - get: configuration
+      passed: ["download-upload-and-stage-healthwatch"]
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: configure-healthwatch
@@ -613,17 +580,9 @@ jobs:
   serial: true
   serial_groups: [ install ]
   plan:
-    - in_parallel:
-      - get: platform-automation-image
-        params:
-          unpack: true
-        passed:
-          - download-upload-and-stage-healthwatch-pas-exporter
-        trigger: true
-      - get: platform-automation-tasks
-        params:
-          unpack: true
-      - get: configuration
+    - in_parallel:  *get-pai-and-pat
+    - get: configuration
+      passed: ["download-upload-and-stage-healthwatch-pas-exporter"]
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: configure-healthwatch
@@ -643,19 +602,12 @@ jobs:
   serial: true
   serial_groups: [ install ]
   plan:
-  - in_parallel:
-    - get: platform-automation-image
-      params:
-        unpack: true
-      passed:
-      - configure-tas
-      - configure-healthwatch
-      - configure-healthwatch-pas-exporter
-      trigger: true
-    - get: platform-automation-tasks
-      params:
-        unpack: true
-    - get: configuration
+  - in_parallel:  *get-pai-and-pat
+  - get: configuration
+    passed:
+    - configure-tas
+    - configure-healthwatch
+    - configure-healthwatch-pas-exporter
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
@@ -703,18 +655,11 @@ jobs:
 - name: run-tas-smoketest-errand
   serial: true
   plan:
-  - in_parallel:
-    - get: platform-automation-image
-      params:
-        unpack: true
-      passed:
-      - configure-tas
-      - configure-healthwatch
-      trigger: true
-    - get: platform-automation-tasks
-      params:
-        unpack: true
-    - get: configuration
+  - in_parallel:  *get-pai-and-pat
+  - get: configuration
+    passed:
+    - configure-tas
+    - configure-healthwatch
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
@@ -731,61 +676,49 @@ jobs:
       ENV_FILE: foundations/config/env.yml
       OPSMAN_SSH_PRIVATE_KEY: ((ops_manager_ssh_private_key))
   # code_snippet run-bosh-errand-usage end
-- name: collect-telemetry
-  serial: true
-  serial_groups: [ install ]
-  plan:
-  - in_parallel:
-    - get: telemetry-collector-binary
-      params:
-        unpack: true
-    - get: platform-automation-image
-      params:
-        unpack: true
-      passed:
-      - apply-product-changes
-      trigger: true
-    - get: platform-automation-tasks
-      params:
-        unpack: true
-    - get: configuration
-  - task: prepare-tasks-with-secrets
-    <<: *prepare-tasks-with-secrets
-  - task: prepare-image
-    <<: *prepare-image
-  # code_snippet collect-telemetry-usage start yaml
-  - task: collect-telemetry-data
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/collect-telemetry.yml
-    input_mapping:
-      env: configuration
-      config: configuration
-    params:
-      CONFIG_FILE: foundations/((foundation))/config/telemetry.yml
-      ENV_FILE: foundations/config/env.yml
-  # code_snippet collect-telemetry-usage end
-  # code_snippet send-telemetry-usage start yaml
-  - task: send-telemetry-data
-    attempts: 3
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/send-telemetry.yml
-    params:
-      API_KEY: no-op-test-key
-      DATA_FILE_PATH: collected-telemetry-data/FoundationDetails*.tar
+#- name: collect-telemetry
+#  serial: true
+#  serial_groups: [ install ]
+#  plan:
+#  - in_parallel: *get-pai-and-pat
+#  - in_parallel:
+#    - get: telemetry-collector-binary
+#      params:
+#        unpack: true
+#    - get: configuration
+#      passed: ["apply-product-changes"]
+#  - task: prepare-tasks-with-secrets
+#    <<: *prepare-tasks-with-secrets
+#  - task: prepare-image
+#    <<: *prepare-image
+#  # code_snippet collect-telemetry-usage start yaml
+#  - task: collect-telemetry-data
+#    image: platform-automation-image
+#    file: platform-automation-tasks/tasks/collect-telemetry.yml
+#    input_mapping:
+#      env: configuration
+#      config: configuration
+#    params:
+#      CONFIG_FILE: foundations/((foundation))/config/telemetry.yml
+#      ENV_FILE: foundations/config/env.yml
+#  # code_snippet collect-telemetry-usage end
+#  # code_snippet send-telemetry-usage start yaml
+#  - task: send-telemetry-data
+#    attempts: 3
+#    image: platform-automation-image
+#    file: platform-automation-tasks/tasks/send-telemetry.yml
+#    params:
+#      API_KEY: no-op-test-key
+#      DATA_FILE_PATH: collected-telemetry-data/FoundationDetails*.tar
 # code_snippet send-telemetry-usage end
 - name: expiring-certificates
   serial: true
   serial_groups: [ install ]
   plan:
+    - in_parallel: *get-pai-and-pat
     - in_parallel:
       - get: daily-trigger
         trigger: true
-      - get: platform-automation-image
-        params:
-          unpack: true
-      - get: platform-automation-tasks
-        params:
-          unpack: true
       - get: configuration
       - get: state
     - task: prepare-tasks-with-secrets
@@ -803,17 +736,9 @@ jobs:
 - name: stage-configure-apply-telemetry
   serial_groups: [install]
   plan:
-    - in_parallel:
-      - get: platform-automation-image
-        params:
-          unpack: true
-        passed:
-          - apply-product-changes
-        trigger: true
-      - get: platform-automation-tasks
-        params:
-          unpack: true
-      - get: configuration
+    - in_parallel: *get-pai-and-pat
+    - get: configuration
+      passed: ["apply-product-changes"]
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: prepare-image
@@ -838,13 +763,8 @@ jobs:
   serial: true
   serial_groups: [install]
   plan:
+    - in_parallel: *get-pai-and-pat
     - in_parallel:
-      - get: platform-automation-image
-        params:
-          unpack: true
-      - get: platform-automation-tasks
-        params:
-          unpack: true
       - get: configuration
       - get: state
     - task: prepare-tasks-with-secrets
@@ -878,14 +798,8 @@ jobs:
 # code_snippet certificate-rotation start
 - name: create-root-ca
   plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
+    - in_parallel: *get-pai-and-pat
+    - get: configuration
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     # code_snippet configure-new-certificate-authority-usage start yaml
@@ -901,16 +815,8 @@ jobs:
 - name: apply-new-ca
   serial: true
   plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          passed:
-            - create-root-ca
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
+    - in_parallel: *get-pai-and-pat
+    - get: configuration
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: pre-deploy-check
@@ -933,16 +839,8 @@ jobs:
 - name: activate-new-ca-and-regenerate-certs
   serial: true
   plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          passed:
-            - apply-new-ca
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
+    - in_parallel: *get-pai-and-pat
+    - get: configuration
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     # code_snippet activate-certificate-authority-usage start yaml
@@ -967,16 +865,9 @@ jobs:
 - name: apply-certificates
   serial: true
   plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          passed:
-            - activate-new-ca-and-regenerate-certs
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
+    - in_parallel: *get-pai-and-pat
+    - get: configuration
+      passed: ["activate-new-ca-and-regenerate-certs"]
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: pre-deploy-check
@@ -999,16 +890,8 @@ jobs:
 - name: cleanup-ca-certificate-authorities
   serial: true
   plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          passed:
-            - apply-certificates
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
+    - in_parallel: *get-pai-and-pat
+    - get: configuration
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     # code_snippet delete-certificate-authority-usage start yaml

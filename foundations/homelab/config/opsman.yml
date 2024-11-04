@@ -1,0 +1,23 @@
+# assuming single pipeline per foundation.
+# cred names are reused, but exist on unique pipeline paths
+opsman-configuration:
+  vsphere:
+    vcenter:
+      url: ((vcenter_url))
+      username: ((vcenter_user.username))
+      password: ((vcenter_user.password))
+      datastore: LUN01
+      datacenter: Datacenter
+      resource_pool: /Datacenter/host/Cluster
+      insecure: 1
+    ssh_public_key: ((vsphere_ssh_key))
+    disk_type: thin
+    private_ip: 194.168.1.10
+    dns: 10.192.2.10,10.192.2.11
+    ntp: time.svc.pivotal.io
+    hostname: ((opsman_url))
+    network: development-PAS-Infrastructure
+    netmask: 255.255.255.0
+    gateway: 194.168.1.1
+    memory: 9
+    cpu: 2
