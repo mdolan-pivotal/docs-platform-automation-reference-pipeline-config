@@ -11,11 +11,10 @@ if [ -z "$PUSH_PULL" ] || [ -z "$HOST_PRIVATE_KEY" ] || [ -z "$HOST_USERNAME" ];
     exit 1
 fi
 
-# Define host and file paths
-LOCAL_PATH="scp-files"   # Replace with actual local path
+echo "${HOST_PRIVATE_KEY}" > /tmp/scp-key.pem
 
 # Set up SSH options
-SSH_OPTIONS="-i $HOST_PRIVATE_KEY -o StrictHostKeyChecking=no"
+SSH_OPTIONS="-i /tmp/scp-key.pem -o StrictHostKeyChecking=no"
 
 # Determine direction of transfer based on PUSH_PULL
 if [ "$PUSH_PULL" == "push" ]; then
