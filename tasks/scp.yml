@@ -18,15 +18,19 @@ params:
   # - Required
   # - Is this a "push" from the container to a host or a "pull" from a host to the container?
 
-  SSH_HOST_PRIVATE_KEY:
+  HOST_FQDN:
+  # - Required
+  # - fully qualified domain name of the remote host
+
+  HOST_PRIVATE_KEY:
   # - Required
   # - The SSH private key to authenticate to the host
 
-  SSH_HOST_USERNAME: ubuntu
+  HOST_USERNAME: ubuntu
   # - Required
   # - The username to use for ssh authentication to the host
 
-  SSH_REMOTE_PATH:
+  HOST_PATH:
   # - Required
   # - The path to the file on the remote host
 
