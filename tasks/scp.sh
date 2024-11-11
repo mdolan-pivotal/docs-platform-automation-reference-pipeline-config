@@ -6,7 +6,7 @@ cat /var/version && echo ""
 set -eu
 
 # Check if necessary environment variables are set
-if [ -z "$PUSH_PULL" ] || [ -z "$SSH_HOST_PRIVATE_KEY" ] || [ -z "$SSH_HOST_USERNAME" ]; then
+if [ -z "$PUSH_PULL" ] || [ -z "$HOST_PRIVATE_KEY" ] || [ -z "$HOST_USERNAME" ]; then
     echo "Error: Missing required environment variables."
     exit 1
 fi
