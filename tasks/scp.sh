@@ -12,6 +12,7 @@ if [ -z "$PUSH_PULL" ] || [ -z "$HOST_PRIVATE_KEY" ] || [ -z "$HOST_USERNAME" ];
 fi
 
 echo "${HOST_PRIVATE_KEY}" > /tmp/scp-key.pem
+chmod 600 /tmp/scp-key.pem
 
 # Set up SSH options
 SSH_OPTIONS="-i /tmp/scp-key.pem -o StrictHostKeyChecking=no"
