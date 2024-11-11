@@ -3,17 +3,11 @@ platform: linux
 
 inputs:
   - name: custom-tasks-repo
-  - name: scp-files
 outputs:
   - name: scp-files
 
 
 params:
-  ENV_FILE: env.yml
-  # - Required
-  # - Filepath of the env config YAML
-  # - The path is relative to the root of the `env` input
-
   PUSH_PULL:
   # - Required
   # - Is this a "push" from the container to a host or a "pull" from a host to the container?
@@ -33,6 +27,10 @@ params:
   HOST_PATH:
   # - Required
   # - The path to the file on the remote host
+
+  LOCAL_PATH:
+  # - Required
+  # - The path to the file on the local concourse container
 
 run:
   path: custom-tasks-repo/tasks/scp.sh
