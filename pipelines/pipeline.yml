@@ -18,7 +18,7 @@ groups:
     - configure-tas
     - apply-product-changes
     - run-tas-smoketest-errand
-    - stage-configure-apply-telemetry
+#    - stage-configure-apply-telemetry
 #    - collect-telemetry
   name: reference-pipeline
 - jobs:
@@ -81,8 +81,8 @@ resources:
 ## code_snippet reference-resources-s3 end yaml
 
 # code_snippet export-installation-resource-usage start yaml
-- name: installation
-  type: pivnet #placeholder till I get the scp resource working
+#- name: installation
+  #type: pivnet #placeholder till I get the scp resource working
 #  type: s3-with-arn
 #  source:
 #    access_key_id: ((s3_with_role.access_key_id))
@@ -177,6 +177,7 @@ jobs:
   serial: true
   plan:
     - in_parallel:  *get-pai-and-pat
+    - get: configuration
     # code_snippet test-interpolate-usage start yaml
     - task: test-interpolate
       image: platform-automation-image
@@ -292,9 +293,22 @@ jobs:
     params:
       INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
       ENV_FILE: foundations/config/env.yml
-  - put: installation
+  #- put: installation
+  #  params:
+  #    file: installation/((foundation))-installation*.zip
+
+  - task: scp-installation
+    image: platform-automation-image
+    file: configuration/tasks/scp.yml
+    input_mapping:
+      custom-tasks-repo: configuration
     params:
-      file: installation/((foundation))-installation*.zip
+      PUSH_PULL: push
+      HOST_FQDN: ((scp_host))
+      HOST_PRIVATE_KEY: ((scp_private_key))
+      HOST_USERNAME: ((scp_user))
+      HOST_PATH: "/tmp"
+      LOCAL_PATH: "installation/*"
 
 - name: export-installation
   serial_groups: [ install ]
@@ -330,20 +344,21 @@ jobs:
       ENV_FILE: foundations/config/env.yml
       INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
   # code_snippet export-installation-usage end
-  - put: installation
-    params:
-      file: installation/((foundation))-installation*.zip
-
+#  - put: installation
+#    params:
+#      file: installation/((foundation))-installation*.zip
+#
 - name: upgrade-opsman
   serial: true
   serial_groups: [ install ]
   plan:
   - in_parallel:  *get-pai-and-pat
   - in_parallel:
-    - get: installation
-      passed: [ export-installation ]
+    #- get: installation
+      #passed: [ export-installation ]
     - get: state
     - get: configuration
+      passed: ["export-installation"]
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
@@ -406,9 +421,9 @@ jobs:
     params:
       ENV_FILE: foundations/config/env.yml
       INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
-  - put: installation
-    params:
-      file: installation/((foundation))-installation*.zip
+  #- put: installation
+  #  params:
+  #    file: installation/((foundation))-installation*.zip
 
 - name: download-upload-and-stage-tas
   serial: true
@@ -649,9 +664,9 @@ jobs:
     params:
       ENV_FILE: foundations/config/env.yml
       INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
-  - put: installation
-    params:
-      file: installation/((foundation))-installation*.zip
+  #- put: installation
+  #  params:
+  #    file: installation/((foundation))-installation*.zip
 - name: run-tas-smoketest-errand
   serial: true
   plan:
@@ -659,7 +674,7 @@ jobs:
   - get: configuration
     passed:
     - configure-tas
-    - configure-healthwatch
+    - apply-product-changes
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
@@ -733,31 +748,31 @@ jobs:
         ENV_FILE: foundations/config/env.yml
         EXPIRES_WITHIN: 2m
     # code_snippet expiring-certificates-usage end
-- name: stage-configure-apply-telemetry
-  serial_groups: [install]
-  plan:
-    - in_parallel: *get-pai-and-pat
-    - get: configuration
-      passed: ["apply-product-changes"]
-    - task: prepare-tasks-with-secrets
-      <<: *prepare-tasks-with-secrets
-    - task: prepare-image
-      <<: *prepare-image
-    # code_snippet stage-configure-apply-usage start yaml
-    - task: stage-configure-apply
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/stage-configure-apply.yml
-      attempts: 3
-      params:
-        CONFIG_FILE: foundations/((foundation))/config/p-telemetry.yml
-        STAGE_PRODUCT_CONFIG_FILE: foundations/((foundation))/config/p-telemetry.yml
-        ENV_FILE: foundations/config/env.yml
-        VARS_FILES: |
-          vars/foundations/((foundation))/vars/director.yml
-      input_mapping:
-        env: configuration
-        config: configuration
-        vars: configuration
+#- name: stage-configure-apply-telemetry
+#  serial_groups: [install]
+#  plan:
+#    - in_parallel: *get-pai-and-pat
+#    - get: configuration
+#      passed: ["apply-product-changes"]
+#    - task: prepare-tasks-with-secrets
+#      <<: *prepare-tasks-with-secrets
+#    - task: prepare-image
+#      <<: *prepare-image
+#    # code_snippet stage-configure-apply-usage start yaml
+#    - task: stage-configure-apply
+#      image: platform-automation-image
+#      file: platform-automation-tasks/tasks/stage-configure-apply.yml
+#      attempts: 3
+#      params:
+#        CONFIG_FILE: foundations/((foundation))/config/p-telemetry.yml
+#        STAGE_PRODUCT_CONFIG_FILE: foundations/((foundation))/config/p-telemetry.yml
+#        ENV_FILE: foundations/config/env.yml
+#        VARS_FILES: |
+#          vars/foundations/((foundation))/vars/director.yml
+#      input_mapping:
+#        env: configuration
+#        config: configuration
+#        vars: configuration
     # code_snippet stage-configure-apply-usage end
 - name: delete-installation
   serial: true
