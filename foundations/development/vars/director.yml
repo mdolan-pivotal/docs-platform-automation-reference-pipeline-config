@@ -1,3 +1,0 @@
-bosh_disk_path: pcf_disk
-bosh_template_folder: pcf_templates
-bosh_vm_folder: pcf_vms

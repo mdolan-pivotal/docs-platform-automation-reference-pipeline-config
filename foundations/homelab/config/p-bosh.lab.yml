@@ -1,0 +1,50 @@
+product-name: p-bosh
+network-properties:
+  network:
+    name: vlan64
+  other_availability_zones: []
+  singleton_availability_zone:
+    name: az1
+resource-config:
+  compilation:
+    max_in_flight: 1
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: 2xlarge.cpu
+    instances: automatic
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+      vif_type: null
+    swap_as_percent_of_memory_size: automatic
+  director:
+    max_in_flight: 1
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: xlarge.cpu
+    instances: automatic
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+      vif_type: null
+    persistent_disk:
+      name: "204800"
+      size_mb: "204800"
+    swap_as_percent_of_memory_size: automatic
+syslog-properties:
+  address: null
+  custom_rsyslog_configuration: null
+  enabled: false
+  environment: null
+  forward_debug_logs: false
+  permitted_peer: null
+  port: null
+  queue_size: null
+  ssl_ca_certificate: null
+  tls_enabled: false
+  transport_protocol: tcp
+

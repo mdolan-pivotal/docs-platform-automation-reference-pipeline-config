@@ -1,2 +1,2 @@
-vsphere_tas_network: TAS
-vsphere_services_network: Services
+vsphere_tas_network: vlan64
+vsphere_services_network: vlan64

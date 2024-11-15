@@ -1,2 +1,2 @@
-vsphere_tas_network: TAS
+vsphere_tas_network: vlan64
 mysql_monitor_recipient_email: noreply-development@vmware.com
