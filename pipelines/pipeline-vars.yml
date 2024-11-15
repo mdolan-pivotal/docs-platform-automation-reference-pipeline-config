@@ -1,0 +1,28 @@
+foundation: homelab
+docs-ref-pipeline-repo-uri: https://github.com/mdolan-pivotal/docs-platform-automation-reference-pipeline-config 
+docs-ref-pipeline-repo-key:
+  private_key: ((tile_config.scp_private_key))
+ops_manager_ssh_private_key: ((tile_config.scp_private_key))
+opsman-ssl:
+  ca: |
+    -----BEGIN CERTIFICATE-----
+    MIIDUDCCAjigAwIBAgIUbOjvaLPbC0gMuAK624fMxmCvjPkwDQYJKoZIhvcNAQEL
+    BQAwHzELMAkGA1UEBhMCVVMxEDAOBgNVBAoMB1Bpdm90YWwwHhcNMjQxMDA4MTQw
+    NzU3WhcNMjgxMDA4MTQwNzU3WjAfMQswCQYDVQQGEwJVUzEQMA4GA1UECgwHUGl2
+    b3RhbDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALA3pSkDD6R0lLPW
+    q9FXyGelHW5J4ha9iLbbkhFqX4U94ODh4xhCYrhCjcakft4xa3Vqypmx8Hb/L78M
+    CBeKzqfR9GGgT1fCDNYB/Yct727IfyIBiWSgNCXs9m0M5LYL+I1dqIsXcg/Ygg0a
+    /iJ3klh1D6ME1YAmWXM+6kRodwKKyLA2ez3JEY9F8QbmC+4rPGKpcqX14DKtG9OV
+    klE70Q7UTR8CNqebLWmNjBV4vQDr17RDUnGXZgSr2WFu7IRMPK1zFq2HpioKGhIy
+    MICTUXsZOXyLmboCUYiCxYu0CLeOmzhpGsyHHGVKxirD9MnKSnZ+2HBUuQNhR48l
+    zg4NslkCAwEAAaOBgzCBgDAdBgNVHQ4EFgQUODB4qBBqQZz9lyiKDOzCIJbM37Mw
+    HwYDVR0jBBgwFoAUODB4qBBqQZz9lyiKDOzCIJbM37MwHQYDVR0lBBYwFAYIKwYB
+    BQUHAwIGCCsGAQUFBwMBMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgEG
+    MA0GCSqGSIb3DQEBCwUAA4IBAQB9AD9V8ynVvUNhHqUtQYIXOtT80YrVQC8bAN8u
+    ccJGvaKGVUf4O3KrmWVYh3+BsUm0qSxOnEJ8WaPtXIYBnEVVnMZgGb/useSvd17s
+    FNBO64iXAqV1ncPVA7XacjHFUorT7f96A5fcInbzEeyIDIEWKvlK8nIR8ZECNjdF
+    SCKR+9HWdAL0YZhPiMnH6qG76CwdMs1zyBY9ldp5GokQ3myMngjBA/+j9xgm014t
+    nx3nliFn4IOc0A2tpQQpOb48sQSNEhDFNKr7+Xj7Z56IHdrUrzguEphOhLKlf9oE
+    OLvo5V8g1QOl3Zzv1ZgfAFfznl/fnwOFStCmSfEC17Zron08
+    -----END CERTIFICATE-----
+pivnet-refresh-token: ((tile_config.pivnet_refresh_token))

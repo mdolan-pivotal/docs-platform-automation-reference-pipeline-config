@@ -13,7 +13,7 @@ product-properties:
     value: /tmp
   .properties.backups_selector.scp.key:
     value:
-      secret: ((scp_private_key))
+      secret: ((tile_config.scp_private_key))
   .properties.backups_selector.scp.port:
     value: 22
   .properties.backups_selector.scp.server:
