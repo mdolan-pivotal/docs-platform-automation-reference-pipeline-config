@@ -1,4 +1,4 @@
-opsman-version: "3.0.32*"
+opsman-version: "3.0.32+LTS-T"
 pks-version: 1.4.3
 tas-version: "4.0.29*"
 healthwatch-version: "2.3.1*"
