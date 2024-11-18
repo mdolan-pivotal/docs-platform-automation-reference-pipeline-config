@@ -15,7 +15,7 @@ opsman-configuration:
     private_ip: 194.168.64.31
     dns: 192.168.64.1
     ntp: 192.168.64.1
-    hostname: ((opsman_url))
+    hostname: ((ops_manager_dns.fqdn))
     network: "VM Network"
     netmask: 255.255.255.0
     gateway: 194.168.64.1
