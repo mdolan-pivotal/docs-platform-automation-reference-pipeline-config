@@ -113,6 +113,7 @@ resources:
     private_key: ((docs-ref-pipeline-repo-key.private_key))
     uri: ((docs-ref-pipeline-repo-uri))
     branch: develop
+    paths: /foundations/((foundation))/state
 
 # configurations
 - name: configuration
@@ -234,6 +235,7 @@ jobs:
       - put: state
         params:
           file: generated-state/state-((foundation)).yml
+          repository: state
   # code_snippet create-vm-usage end
   # code_snippet configure-authentication-usage start yaml
   - task: configure-authentication
