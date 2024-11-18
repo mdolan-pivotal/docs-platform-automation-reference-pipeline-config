@@ -3,7 +3,7 @@
 #move a file from a source to a destination
 
 cat /var/version && echo ""
-set -eu
+set -eux
 
 timestamp="$(date '+%Y%m%d.%-H%M.%S+%Z')"
 export timestamp
