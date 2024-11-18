@@ -8,7 +8,7 @@ opsman-configuration:
       password: ((vcenter.password))
       datastore: vsanDatastore
       datacenter: dc01
-      #resource_pool: /Datacenter/host/Cluster
+      resource_pool:/dc01/cl01/TASrp 
       insecure: 1
     ssh_public_key: ((tile_config.scp_private_key))
     disk_type: thin
