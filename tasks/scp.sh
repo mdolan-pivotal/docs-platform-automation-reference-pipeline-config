@@ -22,9 +22,9 @@ SSH_OPTIONS="-o StrictHostKeyChecking=no"
 
 # Determine direction of transfer based on PUSH_PULL
 if [ "$PUSH_PULL" == "push" ]; then
-    scp -i /tmp/scp-key.pem "${SSH_OPTIONS} ${LOCAL_PATH} ${HOST_USERNAME}@${HOST_FQDN}:${HOST_PATH}"
+    scp -i /tmp/scp-key.pem "${SSH_OPTIONS}" "${LOCAL_PATH} ${HOST_USERNAME}@${HOST_FQDN}:${HOST_PATH}"
 elif [ "$PUSH_PULL" == "pull" ]; then
-    scp -i /tmp/scp-key.pem "${SSH_OPTIONS} ${HOST_USERNAME}@${HOST_FQDN}:${HOST_PATH} ${LOCAL_PATH}"
+    scp -i /tmp/scp-key.pem "${SSH_OPTIONS}" "${HOST_USERNAME}@${HOST_FQDN}:${HOST_PATH} ${LOCAL_PATH}"
 else
     echo "Error: PUSH_PULL variable must be 'push' or 'pull'."
     exit 1
