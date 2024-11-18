@@ -5,6 +5,9 @@
 cat /var/version && echo ""
 set -eu
 
+timestamp="$(date '+%Y%m%d.%-H%M.%S+%Z')"
+export timestamp
+
 # Check if necessary environment variables are set
 if [ -z "$PUSH_PULL" ] || [ -z "$HOST_PRIVATE_KEY" ] || [ -z "$HOST_USERNAME" ]; then
     echo "Error: Missing required environment variables."
