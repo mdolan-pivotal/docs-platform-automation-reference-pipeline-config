@@ -2,13 +2,11 @@
 platform: linux
 
 inputs:
-  - name: custom-tasks-repo
-outputs:
   - name: scp-files
 
 
 params:
-  PUSH_PULL:
+  PUSH_PULL: push
   # - Required
   # - Is this a "push" from the container to a host or a "pull" from a host to the container?
 
