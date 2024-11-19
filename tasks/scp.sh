@@ -3,7 +3,7 @@
 #move a file from a source to a destination
 
 cat /var/version && echo ""
-set -eu
+set -eux
 
 # Check if necessary environment variables are set
 if [ -z "$PUSH_PULL" ] || [ -z "$HOST_PRIVATE_KEY" ] || [ -z "$HOST_USERNAME" ]; then
@@ -22,6 +22,9 @@ if [ "$PUSH_PULL" == "push" ]; then
     scp -i /tmp/scp-key.pem "${SSH_OPTIONS}" $LOCAL_PATH "${HOST_USERNAME}@${HOST_FQDN}:${HOST_PATH}"
 elif [ "$PUSH_PULL" == "pull" ]; then
 # so if we want to pull a glob, we may need to `ls` that glob and just get the first matching file?
+    export HOST_FQDN
+    export HOST_PATH
+    export SSH_OPTIONS
     file_to_pull=$(ssh -i /tmp/scp-key.pem "${SSH_OPTIONS}" "${HOST_FQDN}" "ls -1r ${HOST_PATH}" | head -1 )
     scp -i /tmp/scp-key.pem "${SSH_OPTIONS}" "${HOST_USERNAME}@${HOST_FQDN}:${file_to_pull}" "${LOCAL_PATH}"
 else
