@@ -3,7 +3,6 @@ platform: linux
 
 inputs:
   - name: custom-tasks-repo
-  - name: installation
 outputs:
   - name: scp-files
 
