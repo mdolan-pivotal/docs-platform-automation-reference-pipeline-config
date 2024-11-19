@@ -5,9 +5,6 @@
 cat /var/version && echo ""
 set -eu
 
-timestamp="$(date '+%Y%m%d.%-H%M.%S+%Z')"
-export timestamp
-
 # Check if necessary environment variables are set
 if [ -z "$PUSH_PULL" ] || [ -z "$HOST_PRIVATE_KEY" ] || [ -z "$HOST_USERNAME" ]; then
     echo "Error: Missing required environment variables."
@@ -24,7 +21,8 @@ SSH_OPTIONS="-o StrictHostKeyChecking=no"
 if [ "$PUSH_PULL" == "push" ]; then
     scp -i /tmp/scp-key.pem "${SSH_OPTIONS}" $LOCAL_PATH "${HOST_USERNAME}@${HOST_FQDN}:${HOST_PATH}"
 elif [ "$PUSH_PULL" == "pull" ]; then
-    scp -i /tmp/scp-key.pem "${SSH_OPTIONS}" "${HOST_USERNAME}@${HOST_FQDN}:${HOST_PATH} ${LOCAL_PATH}"
+# so if we want to pull a glob, we may need to `ls` that glob and just get the first matching file?
+    scp -i /tmp/scp-key.pem "${SSH_OPTIONS}" ${HOST_USERNAME}@${HOST_FQDN}:HOST_PATH "${LOCAL_PATH}"
 else
     echo "Error: PUSH_PULL variable must be 'push' or 'pull'."
     exit 1
