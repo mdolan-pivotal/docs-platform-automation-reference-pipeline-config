@@ -15,16 +15,14 @@ echo "${HOST_PRIVATE_KEY}" > /tmp/scp-key.pem
 chmod 600 /tmp/scp-key.pem
 
 # Set up SSH options
-SSH_OPTIONS="-o StrictHostKeyChecking=no"
-
+export SSH_OPTIONS="-o StrictHostKeyChecking=no"
+export HOST_FQDN="$HOST_FQDN"
+export HOST_PATH="$HOST_PATH"
 # Determine direction of transfer based on PUSH_PULL
 if [ "$PUSH_PULL" == "push" ]; then
     scp -i /tmp/scp-key.pem "${SSH_OPTIONS}" $LOCAL_PATH "${HOST_USERNAME}@${HOST_FQDN}:${HOST_PATH}"
 elif [ "$PUSH_PULL" == "pull" ]; then
 # so if we want to pull a glob, we may need to `ls` that glob and just get the first matching file?
-    export HOST_FQDN
-    export HOST_PATH
-    export SSH_OPTIONS
     file_to_pull=$(ssh -i /tmp/scp-key.pem "${SSH_OPTIONS}" "${HOST_FQDN}" "ls -1r ${HOST_PATH}" | head -1 )
     scp -i /tmp/scp-key.pem "${SSH_OPTIONS}" "${HOST_USERNAME}@${HOST_FQDN}:${file_to_pull}" "${LOCAL_PATH}"
 else
