@@ -23,7 +23,7 @@ if [ "$PUSH_PULL" == "push" ]; then
     scp -i /tmp/scp-key.pem "${SSH_OPTIONS}" $LOCAL_PATH "${HOST_USERNAME}@${HOST_FQDN}:${HOST_PATH}"
 elif [ "$PUSH_PULL" == "pull" ]; then
 # so if we want to pull a glob, we may need to `ls` that glob and just get the first matching file?
-    file_to_pull=$(ssh -i /tmp/scp-key.pem "${SSH_OPTIONS}" "${HOST_USERNAME}@${HOST_FQDN}" "realpath -s $(ls -1r ${HOST_PATH} | head -1 ))"
+    file_to_pull=$(ssh -i /tmp/scp-key.pem "${SSH_OPTIONS}" "${HOST_USERNAME}@${HOST_FQDN}" "realpath -s $(ls -1r ${HOST_PATH} | head -1 )")
     scp -i /tmp/scp-key.pem "${SSH_OPTIONS}" "${HOST_USERNAME}@${HOST_FQDN}:${file_to_pull}" "${LOCAL_PATH}"
 else
     echo "Error: PUSH_PULL variable must be 'push' or 'pull'."
