@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-#move a file from a source to a destination
-
+# move a file from a source to a destination
+# some simple support is in place for wildcards
 cat /var/version && echo ""
-set -eux
+set -eu
 
 # Check if necessary environment variables are set
 if [ -z "$PUSH_PULL" ] || [ -z "$HOST_PRIVATE_KEY" ] || [ -z "$HOST_USERNAME" ]; then
