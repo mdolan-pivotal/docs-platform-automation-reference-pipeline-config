@@ -18,10 +18,8 @@ groups:
     - configure-tas
     - apply-product-changes-for-tas
     - apply-product-changes-for-hw
-    - apply-product-changes-for-hw-exporter
     - run-tas-errands
     - run-hw-errands
-    - run-hw-exporter-errands
 #    - stage-configure-apply-telemetry
 #    - collect-telemetry
   name: reference-pipeline
@@ -653,7 +651,7 @@ jobs:
         env: configuration
         vars: configuration
       params:
-        CONFIG_FILE: foundations/((foundation))/config/healthwatch-pas-exporter.yml
+        CONFIG_FILE: foundations/((foundation))/config/p-healthwatch2-pas-exporter.yml
         ENV_FILE: foundations/config/env.yml
         VARS_FILES: |
           vars/foundations/((foundation))/vars/director.yml
@@ -667,6 +665,7 @@ jobs:
     - configure-tas
     - configure-healthwatch
     - configure-healthwatch-pas-exporter
+    trigger: true
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
@@ -709,6 +708,7 @@ jobs:
   - get: configuration
     passed:
     - apply-product-changes-for-tas
+    trigger: true
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
@@ -721,7 +721,7 @@ jobs:
       env: configuration
     params:
       PRODUCT_NAME: cf
-      ERRAND_NAME: deploy_autoscaler
+      ERRAND_NAME: deploy-autoscaler
       ENV_FILE: foundations/config/env.yml
       OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
   - task: run-bosh-errand
@@ -731,7 +731,7 @@ jobs:
       env: configuration
     params:
       PRODUCT_NAME: cf
-      ERRAND_NAME: deploy_notifications
+      ERRAND_NAME: deploy-notifications
       ENV_FILE: foundations/config/env.yml
   - task: run-bosh-errand
     image: platform-automation-image
@@ -740,7 +740,7 @@ jobs:
       env: configuration
     params:
       PRODUCT_NAME: cf
-      ERRAND_NAME: deploy_notifications_ui
+      ERRAND_NAME: deploy-notifications-ui
       ENV_FILE: foundations/config/env.yml
   - task: run-bosh-errand
     image: platform-automation-image
@@ -842,6 +842,7 @@ jobs:
     passed:
     - configure-healthwatch
     - apply-product-changes-for-tas
+    trigger: true
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
@@ -864,7 +865,7 @@ jobs:
       env: configuration
     params:
       ENV_FILE: foundations/config/env.yml
-      SELECTIVE_DEPLOY_PRODUCTS: p-healthwatch2
+      SELECTIVE_DEPLOY_PRODUCTS: p-healthwatch2,p-healthwatch2-pas-exporter
   # code_snippet apply-changes-usage end
   # code_snippet check-pending-changes-usage start yaml
   # Maybe do this before the actual apply?
@@ -884,6 +885,7 @@ jobs:
   - get: configuration
     passed:
     - apply-product-changes-for-hw
+    trigger: true
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
@@ -899,62 +901,6 @@ jobs:
       ERRAND_NAME: smoke-test
       ENV_FILE: foundations/config/env.yml
       OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
-
-- name: apply-product-changes-for-hw-exporter
-  serial: true
-  plan:
-  - in_parallel:  *get-pai-and-pat
-  - get: configuration
-    passed:
-    - configure-healthwatch-pas-exporter
-    - apply-product-changes-for-hw
-  - task: prepare-tasks-with-secrets
-    <<: *prepare-tasks-with-secrets
-  - task: prepare-image
-    <<: *prepare-image
-  # code_snippet pre-deploy-check-usage start yaml
-  - task: pre-deploy-check
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/pre-deploy-check.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-  # code_snippet pre-deploy-check-usage end
-  # code_snippet apply-changes-usage start yaml
-  - task: apply-product-changes
-    attempts: 3
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/apply-changes.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-      SELECTIVE_DEPLOY_PRODUCTS: p-healthwatch2-pas-exporter
-  # code_snippet apply-changes-usage end
-  # code_snippet check-pending-changes-usage start yaml
-  # Maybe do this before the actual apply?
-  #- task: check-pending-changes
-  #  image: platform-automation-image
-  #  file: platform-automation-tasks/tasks/check-pending-changes.yml
-  #  input_mapping:
-  #    env: configuration
-  #  params:
-  #    ENV_FILE: foundations/config/env.yml
-  #    ALLOW_PENDING_CHANGES: true
-  # code_snippet check-pending-changes-usage end
-- name: run-hw-exporter-errands
-  serial: true
-  plan:
-  - in_parallel:  *get-pai-and-pat
-  - get: configuration
-    passed:
-    - apply-product-changes-for-hw-exporter
-  - task: prepare-tasks-with-secrets
-    <<: *prepare-tasks-with-secrets
-  - task: prepare-image
-    <<: *prepare-image
-  # code_snippet run-bosh-errand-usage start yaml
   - task: run-bosh-errand
     image: platform-automation-image
     file: platform-automation-tasks/tasks/run-bosh-errand.yml
