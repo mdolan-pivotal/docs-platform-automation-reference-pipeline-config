@@ -1,5 +1,5 @@
 ---
-pivnet-product-slug: p-healthwatch2-pas-exporter
+pivnet-product-slug: p-healthwatch
 
 file-glob: "p-healthwatch-pas-exporter*.pivotal"
 product-version: ((healthwatch-version))
