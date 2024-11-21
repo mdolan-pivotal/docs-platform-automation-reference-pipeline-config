@@ -1,0 +1,8 @@
+---
+pivnet-product-slug: p-healthwatch2-pas-exporter
+
+file-glob: "*.pivotal"
+product-version: ((tas-version))
+stemcell-iaas: vsphere
+
+pivnet-api-token: ((tile_config.pivnet_refresh_token))
