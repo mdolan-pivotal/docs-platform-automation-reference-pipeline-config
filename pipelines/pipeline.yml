@@ -16,8 +16,12 @@ groups:
     - configure-healthwatch-pas-exporter
     - configure-healthwatch
     - configure-tas
-    - apply-product-changes
-    - run-tas-smoketest-errand
+    - apply-product-changes-for-tas
+    - apply-product-changes-for-hw
+    - apply-product-changes-for-hw-exporter
+    - run-tas-errands
+    - run-hw-errands
+    - run-hw-exporter-errands
 #    - stage-configure-apply-telemetry
 #    - collect-telemetry
   name: reference-pipeline
@@ -113,7 +117,7 @@ resources:
     private_key: ((docs-ref-pipeline-repo-key.private_key))
     uri: ((docs-ref-pipeline-repo-uri))
     branch: develop
-    paths: /foundations/((foundation))/state
+    #paths: "/foundations/homelab/state"
 
 # configurations
 - name: configuration
@@ -228,7 +232,7 @@ jobs:
       vars: configuration
     params:
       OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
-      STATE_FILE: state-((foundation)).yml
+      STATE_FILE: foundations/((foundation/state-((foundation)).yml
       VARS_FILES: vars/foundations/((foundation))/vars/director.yml
     ensure: &put-state
       do:
@@ -298,19 +302,18 @@ jobs:
   #- put: installation
   #  params:
   #    file: installation/((foundation))-installation*.zip
-
   - task: scp-installation
     image: platform-automation-image
-    file: configuration/tasks/scp.yml
+    file: configuration/tasks/scp-push.yml
     input_mapping:
-      custom-tasks-repo: configuration
+      scp-files: installation
     params:
       PUSH_PULL: push
-      HOST_FQDN: ((scp_host))
-      HOST_PRIVATE_KEY: ((scp_private_key))
-      HOST_USERNAME: ((scp_user))
+      HOST_FQDN: ((scp.host))
+      HOST_PRIVATE_KEY: ((scp.private_key))
+      HOST_USERNAME: ((scp.user))
       HOST_PATH: "/tmp"
-      LOCAL_PATH: "installation/*"
+      LOCAL_PATH: installation/*.zip
 
 - name: export-installation
   serial_groups: [ install ]
@@ -320,7 +323,7 @@ jobs:
   - in_parallel:
     - get: state
     - get: configuration
-      passed: ["install-opsman" ]
+      #passed: ["install-opsman" ]
     - get: daily-trigger
       trigger: true
   - task: prepare-tasks-with-secrets
@@ -349,6 +352,19 @@ jobs:
 #  - put: installation
 #    params:
 #      file: installation/((foundation))-installation*.zip
+  - task: scp-installation
+    image: platform-automation-image
+    file: configuration/tasks/scp-push.yml
+    input_mapping:
+      custom-tasks-repo: configuration
+      scp-files: installation
+    params:
+      PUSH_PULL: push
+      HOST_FQDN: ((scp.host))
+      HOST_PRIVATE_KEY: ((scp.private_key))
+      HOST_USERNAME: ((scp.user))
+      HOST_PATH: "/tmp/installations"
+      LOCAL_PATH: scp-files/*.zip
 #
 - name: upgrade-opsman
   serial: true
@@ -360,7 +376,8 @@ jobs:
       #passed: [ export-installation ]
     - get: state
     - get: configuration
-      passed: ["export-installation"]
+      #passed: ["export-installation"]
+      #trigger: true
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
@@ -378,62 +395,88 @@ jobs:
     output_mapping:
       downloaded-product: opsman-image
   # code_snippet upgrade-opsman-usage start yaml
-  - task: upgrade-opsman
+  - task: scp-installation
     image: platform-automation-image
-    file: platform-automation-tasks/tasks/upgrade-opsman.yml
+    file: configuration/tasks/scp-pull.yml
     input_mapping:
-      image: opsman-image
-      config: configuration
-      env: configuration
-      vars: configuration
+      custom-tasks-repo: configuration
     params:
-      ENV_FILE: foundations/config/env.yml
-      OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
-      STATE_FILE: state-((foundation)).yml
-      INSTALLATION_FILE: ((foundation))-installation*.zip
-      VARS_FILES: vars/foundations/((foundation))/vars/director.yml
-    ensure: *put-state
-  # code_snippet upgrade-opsman-usage end
-  - task: configure-director
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/configure-director.yml
-    input_mapping:
-      config: configuration
-      env: configuration
-      vars: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-      DIRECTOR_CONFIG_FILE: foundations/((foundation))/config/director.yml
-      VARS_FILES: |
-        vars/foundations/((foundation))/vars/director.yml
-        vars/foundations/((foundation))/vars/tas.yml
-  - task: apply-director-changes
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/apply-director-changes.yml
-    attempts: 3
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-  - task: export-installation
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/export-installation.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+      PUSH_PULL: pull
+      HOST_FQDN: ((scp.host))
+      HOST_PRIVATE_KEY: ((scp.private_key))
+      HOST_USERNAME: ((scp.user))
+      HOST_PATH: "/tmp/installations/*.zip"
+      LOCAL_PATH: scp-files/((foundation))-installation.zip
+  #- task: upgrade-opsman
+  #  image: platform-automation-image
+  #  file: platform-automation-tasks/tasks/upgrade-opsman.yml
+  #  input_mapping:
+  #    config: configuration
+  #    env: configuration
+  #    image: opsman-image
+  #    installation: scp-files
+  #    state: state
+  #    vars: configuration
+  #  params:
+  #    ENV_FILE: foundations/config/env.yml
+  #    OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
+  #    STATE_FILE: state-((foundation)).yml
+  #    INSTALLATION_FILE: ((foundation))-installation*.zip
+  #    VARS_FILES: vars/foundations/((foundation))/vars/director.yml
+  #  ensure: *put-state
+  ## code_snippet upgrade-opsman-usage end
+  #- task: configure-director
+  #  image: platform-automation-image
+  #  file: platform-automation-tasks/tasks/configure-director.yml
+  #  input_mapping:
+  #    config: configuration
+  #    env: configuration
+  #    vars: configuration
+  #  params:
+  #    ENV_FILE: foundations/config/env.yml
+  #    DIRECTOR_CONFIG_FILE: foundations/((foundation))/config/director.yml
+  #    VARS_FILES: |
+  #      vars/foundations/((foundation))/vars/director.yml
+  #      vars/foundations/((foundation))/vars/tas.yml
+  #- task: apply-director-changes
+  #  image: platform-automation-image
+  #  file: platform-automation-tasks/tasks/apply-director-changes.yml
+  #  attempts: 3
+  #  input_mapping:
+  #    env: configuration
+  #  params:
+  #    ENV_FILE: foundations/config/env.yml
+  #- task: export-installation
+  #  image: platform-automation-image
+  #  file: platform-automation-tasks/tasks/export-installation.yml
+  #  input_mapping:
+  #    env: configuration
+  #  params:
+  #    ENV_FILE: foundations/config/env.yml
+  #    INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  #- task: scp-installation
+  #  image: platform-automation-image
+  #  file: configuration/tasks/scp.yml
+  #  input_mapping:
+  #    custom-tasks-repo: configuration
+  #  params:
+  #    PUSH_PULL: push
+  #    HOST_FQDN: ((scp.host))
+  #    HOST_PRIVATE_KEY: ((scp.private_key))
+  #    HOST_USERNAME: ((scp.user))
+  #    HOST_PATH: "/tmp"
+  #    LOCAL_PATH: installation/*.zip
   #- put: installation
   #  params:
   #    file: installation/((foundation))-installation*.zip
 
 - name: download-upload-and-stage-tas
   serial: true
-  serial_groups: [ products ]
   plan:
   - in_parallel:  *get-pai-and-pat
   - get: configuration
     passed: [ "upgrade-opsman" ]
+    trigger: true
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
@@ -481,11 +524,11 @@ jobs:
   # code_snippet stage-product-usage end
 - name: download-upload-and-stage-healthwatch
   serial: true
-  serial_groups: [ products ]
   plan:
     - in_parallel:  *get-pai-and-pat
     - get: configuration
       passed: [ "upgrade-opsman" ]
+      trigger: true
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: download-healthwatch
@@ -520,11 +563,11 @@ jobs:
 
 - name: download-upload-and-stage-healthwatch-pas-exporter
   serial: true
-  serial_groups: [ products ]
   plan:
     - in_parallel:  *get-pai-and-pat
     - get: configuration
       passed: [ "upgrade-opsman" ]
+      trigger: true
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: download-healthwatch
@@ -550,11 +593,11 @@ jobs:
 
 - name: configure-tas
   serial: true
-  serial_groups: [ install ]
   plan:
     - in_parallel:  *get-pai-and-pat
     - get: configuration
       passed: ["download-upload-and-stage-tas"]
+      trigger: true
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: configure-tas
@@ -565,7 +608,7 @@ jobs:
         env: configuration
         vars: configuration
       params:
-        CONFIG_FILE: foundations/((foundation))/config/tas.yml
+        CONFIG_FILE: foundations/((foundation))/config/cf.yml
         ENV_FILE: foundations/config/env.yml
         VARS_FILES: |
           vars/foundations/((foundation))/vars/tas.yml
@@ -573,11 +616,11 @@ jobs:
 
 - name: configure-healthwatch
   serial: true
-  serial_groups: [ install ]
   plan:
     - in_parallel:  *get-pai-and-pat
     - get: configuration
       passed: ["download-upload-and-stage-healthwatch"]
+      trigger: true
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: configure-healthwatch
@@ -588,18 +631,18 @@ jobs:
         env: configuration
         vars: configuration
       params:
-        CONFIG_FILE: foundations/((foundation))/config/healthwatch.yml
+        CONFIG_FILE: foundations/((foundation))/config/p-healthwatch2.yml
         ENV_FILE: foundations/config/env.yml
         VARS_FILES: |
           vars/foundations/((foundation))/vars/director.yml
 
 - name: configure-healthwatch-pas-exporter
   serial: true
-  serial_groups: [ install ]
   plan:
     - in_parallel:  *get-pai-and-pat
     - get: configuration
       passed: ["download-upload-and-stage-healthwatch-pas-exporter"]
+      trigger: true
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: configure-healthwatch
@@ -615,9 +658,8 @@ jobs:
         VARS_FILES: |
           vars/foundations/((foundation))/vars/director.yml
 
-- name: apply-product-changes
+- name: apply-product-changes-for-tas
   serial: true
-  serial_groups: [ install ]
   plan:
   - in_parallel:  *get-pai-and-pat
   - get: configuration
@@ -647,36 +689,26 @@ jobs:
       env: configuration
     params:
       ENV_FILE: foundations/config/env.yml
+      SELECTIVE_DEPLOY_PRODUCTS: cf
   # code_snippet apply-changes-usage end
   # code_snippet check-pending-changes-usage start yaml
-  - task: check-pending-changes
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/check-pending-changes.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-      ALLOW_PENDING_CHANGES: true
-  # code_snippet check-pending-changes-usage end
-  - task: export-installation
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/export-installation.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
-  #- put: installation
+  # Maybe do this before the actual apply?
+  #- task: check-pending-changes
+  #  image: platform-automation-image
+  #  file: platform-automation-tasks/tasks/check-pending-changes.yml
+  #  input_mapping:
+  #    env: configuration
   #  params:
-  #    file: installation/((foundation))-installation*.zip
-- name: run-tas-smoketest-errand
+  #    ENV_FILE: foundations/config/env.yml
+  #    ALLOW_PENDING_CHANGES: true
+  # code_snippet check-pending-changes-usage end
+- name: run-tas-errands
   serial: true
   plan:
   - in_parallel:  *get-pai-and-pat
   - get: configuration
     passed:
-    - configure-tas
-    - apply-product-changes
+    - apply-product-changes-for-tas
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
@@ -689,9 +721,251 @@ jobs:
       env: configuration
     params:
       PRODUCT_NAME: cf
+      ERRAND_NAME: deploy_autoscaler
+      ENV_FILE: foundations/config/env.yml
+      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
+  - task: run-bosh-errand
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: deploy_notifications
+      ENV_FILE: foundations/config/env.yml
+  - task: run-bosh-errand
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: deploy_notifications_ui
+      ENV_FILE: foundations/config/env.yml
+  - task: run-bosh-errand
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: metric_registrar_smoke_test
+      ENV_FILE: foundations/config/env.yml
+  - task: run-bosh-errand
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: nfsbrokerpush
+      ENV_FILE: foundations/config/env.yml
+  - task: run-bosh-errand
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: push-apps-manager
+      ENV_FILE: foundations/config/env.yml
+  - task: run-bosh-errand
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: push-offline-docs
+      ENV_FILE: foundations/config/env.yml
+  - task: run-bosh-errand
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: push-tas-portal
+      ENV_FILE: foundations/config/env.yml
+  - task: run-bosh-errand
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: push-usage-service
+      ENV_FILE: foundations/config/env.yml
+  - task: run-bosh-errand
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: rotate_cc_database_key
+      ENV_FILE: foundations/config/env.yml
+  - task: run-bosh-errand
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: smbbrokerpush
+      ENV_FILE: foundations/config/env.yml
+  - task: run-bosh-errand
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
       ERRAND_NAME: smoke_tests
       ENV_FILE: foundations/config/env.yml
-      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager_ssh_private_key))
+  - task: run-bosh-errand
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: test-autoscaling
+      ENV_FILE: foundations/config/env.yml
+
+
+- name: apply-product-changes-for-hw
+  serial: true
+  plan:
+  - in_parallel:  *get-pai-and-pat
+  - get: configuration
+    passed:
+    - configure-healthwatch
+    - apply-product-changes-for-tas
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  # code_snippet pre-deploy-check-usage start yaml
+  - task: pre-deploy-check
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/pre-deploy-check.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  # code_snippet pre-deploy-check-usage end
+  # code_snippet apply-changes-usage start yaml
+  - task: apply-product-changes
+    attempts: 3
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/apply-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      SELECTIVE_DEPLOY_PRODUCTS: p-healthwatch2
+  # code_snippet apply-changes-usage end
+  # code_snippet check-pending-changes-usage start yaml
+  # Maybe do this before the actual apply?
+  #- task: check-pending-changes
+  #  image: platform-automation-image
+  #  file: platform-automation-tasks/tasks/check-pending-changes.yml
+  #  input_mapping:
+  #    env: configuration
+  #  params:
+  #    ENV_FILE: foundations/config/env.yml
+  #    ALLOW_PENDING_CHANGES: true
+  # code_snippet check-pending-changes-usage end
+- name: run-hw-errands
+  serial: true
+  plan:
+  - in_parallel:  *get-pai-and-pat
+  - get: configuration
+    passed:
+    - apply-product-changes-for-hw
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  # code_snippet run-bosh-errand-usage start yaml
+  - task: run-bosh-errand
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: p-healthwatch2
+      ERRAND_NAME: smoke-test
+      ENV_FILE: foundations/config/env.yml
+      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
+
+- name: apply-product-changes-for-hw-exporter
+  serial: true
+  plan:
+  - in_parallel:  *get-pai-and-pat
+  - get: configuration
+    passed:
+    - configure-healthwatch-pas-exporter
+    - apply-product-changes-for-hw
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  # code_snippet pre-deploy-check-usage start yaml
+  - task: pre-deploy-check
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/pre-deploy-check.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  # code_snippet pre-deploy-check-usage end
+  # code_snippet apply-changes-usage start yaml
+  - task: apply-product-changes
+    attempts: 3
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/apply-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      SELECTIVE_DEPLOY_PRODUCTS: p-healthwatch2-pas-exporter
+  # code_snippet apply-changes-usage end
+  # code_snippet check-pending-changes-usage start yaml
+  # Maybe do this before the actual apply?
+  #- task: check-pending-changes
+  #  image: platform-automation-image
+  #  file: platform-automation-tasks/tasks/check-pending-changes.yml
+  #  input_mapping:
+  #    env: configuration
+  #  params:
+  #    ENV_FILE: foundations/config/env.yml
+  #    ALLOW_PENDING_CHANGES: true
+  # code_snippet check-pending-changes-usage end
+- name: run-hw-exporter-errands
+  serial: true
+  plan:
+  - in_parallel:  *get-pai-and-pat
+  - get: configuration
+    passed:
+    - apply-product-changes-for-hw-exporter
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  # code_snippet run-bosh-errand-usage start yaml
+  - task: run-bosh-errand
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: p-healthwatch2-pas-exporter
+      ERRAND_NAME: smoke-test
+      ENV_FILE: foundations/config/env.yml
+      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
+
   # code_snippet run-bosh-errand-usage end
 #- name: collect-telemetry
 #  serial: true
