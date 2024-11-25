@@ -714,107 +714,7 @@ jobs:
   - task: prepare-image
     <<: *prepare-image
   # code_snippet run-bosh-errand-usage start yaml
-  - task: run-bosh-errand
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/run-bosh-errand.yml
-    input_mapping:
-      env: configuration
-    params:
-      PRODUCT_NAME: cf
-      ERRAND_NAME: deploy-autoscaler
-      ENV_FILE: foundations/config/env.yml
-      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
-  - task: run-bosh-errand
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/run-bosh-errand.yml
-    input_mapping:
-      env: configuration
-    params:
-      PRODUCT_NAME: cf
-      ERRAND_NAME: deploy-notifications
-      ENV_FILE: foundations/config/env.yml
-  - task: run-bosh-errand
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/run-bosh-errand.yml
-    input_mapping:
-      env: configuration
-    params:
-      PRODUCT_NAME: cf
-      ERRAND_NAME: deploy-notifications-ui
-      ENV_FILE: foundations/config/env.yml
-  - task: run-bosh-errand
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/run-bosh-errand.yml
-    input_mapping:
-      env: configuration
-    params:
-      PRODUCT_NAME: cf
-      ERRAND_NAME: metric_registrar_smoke_test
-      ENV_FILE: foundations/config/env.yml
-  - task: run-bosh-errand
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/run-bosh-errand.yml
-    input_mapping:
-      env: configuration
-    params:
-      PRODUCT_NAME: cf
-      ERRAND_NAME: nfsbrokerpush
-      ENV_FILE: foundations/config/env.yml
-  - task: run-bosh-errand
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/run-bosh-errand.yml
-    input_mapping:
-      env: configuration
-    params:
-      PRODUCT_NAME: cf
-      ERRAND_NAME: push-apps-manager
-      ENV_FILE: foundations/config/env.yml
-  - task: run-bosh-errand
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/run-bosh-errand.yml
-    input_mapping:
-      env: configuration
-    params:
-      PRODUCT_NAME: cf
-      ERRAND_NAME: push-offline-docs
-      ENV_FILE: foundations/config/env.yml
-  - task: run-bosh-errand
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/run-bosh-errand.yml
-    input_mapping:
-      env: configuration
-    params:
-      PRODUCT_NAME: cf
-      ERRAND_NAME: push-tas-portal
-      ENV_FILE: foundations/config/env.yml
-  - task: run-bosh-errand
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/run-bosh-errand.yml
-    input_mapping:
-      env: configuration
-    params:
-      PRODUCT_NAME: cf
-      ERRAND_NAME: push-usage-service
-      ENV_FILE: foundations/config/env.yml
-  - task: run-bosh-errand
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/run-bosh-errand.yml
-    input_mapping:
-      env: configuration
-    params:
-      PRODUCT_NAME: cf
-      ERRAND_NAME: rotate_cc_database_key
-      ENV_FILE: foundations/config/env.yml
-  - task: run-bosh-errand
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/run-bosh-errand.yml
-    input_mapping:
-      env: configuration
-    params:
-      PRODUCT_NAME: cf
-      ERRAND_NAME: smbbrokerpush
-      ENV_FILE: foundations/config/env.yml
-  - task: run-bosh-errand
+  - task: smoke_tests
     image: platform-automation-image
     file: platform-automation-tasks/tasks/run-bosh-errand.yml
     input_mapping:
@@ -823,7 +723,119 @@ jobs:
       PRODUCT_NAME: cf
       ERRAND_NAME: smoke_tests
       ENV_FILE: foundations/config/env.yml
-  - task: run-bosh-errand
+      INSTANCE: backup_restore/first
+  - task: deploy-autoscaler
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: deploy-autoscaler
+      ENV_FILE: foundations/config/env.yml
+      INSTANCE: backup_restore/first
+      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
+  - task: deploy-notifications
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: deploy-notifications
+      ENV_FILE: foundations/config/env.yml
+      INSTANCE: backup_restore/first
+  - task: deploy-notifications-ui
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: deploy-notifications-ui
+      ENV_FILE: foundations/config/env.yml
+      INSTANCE: backup_restore/first
+  - task: metric-registrar-smoke-test
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: metric_registrar_smoke_test
+      ENV_FILE: foundations/config/env.yml
+      INSTANCE: backup_restore/first
+  - task: nfsbrokerpush
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: nfsbrokerpush
+      ENV_FILE: foundations/config/env.yml
+      INSTANCE: backup_restore/first
+  - task: push-apps-manager
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: push-apps-manager
+      ENV_FILE: foundations/config/env.yml
+      INSTANCE: backup_restore/first
+  - task: push-offline-docs
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: push-offline-docs
+      ENV_FILE: foundations/config/env.yml
+      INSTANCE: backup_restore/first
+  - task: push-tas-portal
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: push-tas-portal
+      ENV_FILE: foundations/config/env.yml
+      INSTANCE: backup_restore/first
+  - task: push-usage-service
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: push-usage-service
+      ENV_FILE: foundations/config/env.yml
+      INSTANCE: backup_restore/first
+  - task: rotate-cc-database-key
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: rotate_cc_database_key
+      ENV_FILE: foundations/config/env.yml
+      INSTANCE: backup_restore/first
+  - task: smb-broker-push
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: cf
+      ERRAND_NAME: smbbrokerpush
+      ENV_FILE: foundations/config/env.yml
+      INSTANCE: backup_restore/first
+  - task: test-autoscaling
     image: platform-automation-image
     file: platform-automation-tasks/tasks/run-bosh-errand.yml
     input_mapping:
@@ -832,6 +844,7 @@ jobs:
       PRODUCT_NAME: cf
       ERRAND_NAME: test-autoscaling
       ENV_FILE: foundations/config/env.yml
+      INSTANCE: backup_restore/first
 
 
 - name: apply-product-changes-for-hw
@@ -891,7 +904,7 @@ jobs:
   - task: prepare-image
     <<: *prepare-image
   # code_snippet run-bosh-errand-usage start yaml
-  - task: run-bosh-errand
+  - task: healthwatch-smoke-test
     image: platform-automation-image
     file: platform-automation-tasks/tasks/run-bosh-errand.yml
     input_mapping:
@@ -901,7 +914,17 @@ jobs:
       ERRAND_NAME: smoke-test
       ENV_FILE: foundations/config/env.yml
       OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
-  - task: run-bosh-errand
+  - task: healthwatch-update-admin-password
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: p-healthwatch2
+      ERRAND_NAME: update-admin-password
+      ENV_FILE: foundations/config/env.yml
+      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
+  - task: healthwatch-exporter-smoke-text
     image: platform-automation-image
     file: platform-automation-tasks/tasks/run-bosh-errand.yml
     input_mapping:
