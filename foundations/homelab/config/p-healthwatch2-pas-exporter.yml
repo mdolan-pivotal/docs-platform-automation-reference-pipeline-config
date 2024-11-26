@@ -140,7 +140,7 @@ errand-config:
   delete-cf-sli-user:
     pre-delete-state: true
   smoke-test:
-    post-deploy-state: true
+    post-deploy-state: false
 syslog-properties:
   address: null
   custom_rsyslog_configuration: null
