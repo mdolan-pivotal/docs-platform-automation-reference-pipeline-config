@@ -1,0 +1,8 @@
+---
+pivnet-product-slug: pivotal-mysql
+
+file-glob: "*mysql*.pivotal"
+product-version: ((mysql-version))
+stemcell-iaas: vsphere
+
+pivnet-api-token: ((tile_config.pivnet_refresh_token))

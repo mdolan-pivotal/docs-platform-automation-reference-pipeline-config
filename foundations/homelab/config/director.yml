@@ -1,13 +1,128 @@
-product-name: p-bosh
-network-properties:
+az-configuration:
+- name: az1
+  iaas_configuration_name: default
+  clusters:
+  - cluster: cl01
+    drs_rule: SHOULD
+    host_group: null
+    resource_pool: TASrp
+iaas-configurations:
+- additional_cloud_properties: {}
+  bosh_disk_path: pcf_disk
+  bosh_template_folder: pcf_templates
+  bosh_vm_folder: pcf_vms
+  datacenter: dc01
+  disk_type: thin
+  enable_human_readable_name: true
+  ensure_no_ip_conflicts: true
+  ephemeral_datastore_clusters_string: ""
+  ephemeral_datastores_string: vsanDatastore
+  name: default
+  nsx_address: nsx.diggity00.net
+  nsx_ca_certificate: ((nsx_ca_certificate))
+  nsx_mode: nsx-t
+  nsx_networking_enabled: true
+  nsx_password: ((nsx.password))
+  nsx_t_auth_type: local_user
+  nsx_t_tag_nsx_vm_objects: true
+  nsx_t_use_policy_api: true
+  nsx_t_use_policy_api_migration_mode: false
+  nsx_username: ((nsx.user))
+  persistent_datastore_clusters_string: ""
+  persistent_datastores_string: vsanDatastore
+  ssl_verification_enabled: false
+  vcenter_host: ((vcenter.host))
+  vcenter_password: ((vcenter.password))
+  vcenter_username: ((vcenter.user))
+network-assignment:
   network:
     name: ((director_network))
   other_availability_zones: []
   singleton_availability_zone:
     name: az1
-resource-config:
+networks-configuration:
+  icmp_checks_enabled: true
+  networks:
+  - name: ((director_network))
+    subnets:
+    - iaas_identifier: dvVMNetwork
+      cidr: 192.168.64.0/24
+      dns: 192.168.64.1
+      gateway: 192.168.64.1
+      reserved_ip_ranges: 192.168.64.1-192.168.64.39
+      availability_zone_names:
+      - az1
+properties-configuration:
+  director_configuration:
+    additional_ssh_users: []
+    automatic_certificate_rotation_enabled: false
+    blobstore_type: local
+    bosh_director_recreate_on_next_deploy: false
+    bosh_recreate_on_next_deploy: false
+    bosh_recreate_persistent_disks_on_next_deploy: false
+    ca_certificate_duration: 1460
+    database_type: internal
+    director_metrics_server_enabled: true
+    director_worker_count: 5
+    duration_overrides_enabled: true
+    encryption:
+      keys: []
+      providers: []
+    hm_emailer_options:
+      enabled: false
+    hm_pager_duty_options:
+      enabled: false
+    identification_tags: {}
+    job_configuration_on_tmpfs: false
+    keep_unreachable_vms: false
+    leaf_certificate_duration: 730
+    local_blobstore_options:
+      enable_signed_urls: true
+    ntp_servers_string: 192.168.64.1
+    post_deploy_enabled: false
+    resurrector_enabled: false
+    retry_bosh_deploys: false
+    short_lived_nats_bootstrap_credentials_enabled: false
+    skip_director_drain: false
+    system_metrics_runtime_enabled: true
+  dns_configuration:
+    excluded_recursors: []
+    handlers: []
+  security_configuration:
+    clear_default_trusted_certificates_store: false
+    generate_vm_passwords: true
+    opsmanager_root_ca_trusted_certs: true
+    trusted_certificates: |-
+      -----BEGIN CERTIFICATE-----
+      MIIEUjCCArqgAwIBAgIRALwwTMBAP7lA2JAHYIOudnEwDQYJKoZIhvcNAQELBQAw
+      MjELMAkGA1UEBhMCVVMxFjAUBgNVBAoTDUNsb3VkIEZvdW5kcnkxCzAJBgNVBAMT
+      AmNhMB4XDTI0MTExOTE5NTgzOFoXDTI1MTExOTE5NTgzOFowMjELMAkGA1UEBhMC
+      VVMxFjAUBgNVBAoTDUNsb3VkIEZvdW5kcnkxCzAJBgNVBAMTAmNhMIIBojANBgkq
+      hkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAwTwYQ9CjHm8HZX+Kwms5qlS+9Sb/r5vf
+      /pxaNHCV6POpNJNDUzTNyXeXce2gUwoFmWyCthCup1Eb8e19jdY6b8sp4nM0NGKg
+      +cV+qJAQdfAG4eH52vy4MoQt9WEGo81xEzb249A28h7bsUv9TZ9rjVGbOT4GQerY
+      ZMywMiNYlXiCTs7kZARAiTDA5L7gCVMxZk973wp+ZJQmvdhkVi3CM6R5XvvhsiNb
+      BbZ8vavc6xCIPjqD/x+coIe1tBoXdoas/56uhM9lqhnfYfah0qXQ/a9FislONnIh
+      RrLl0eqVy5jbnPkpbxqLWaTx8eGyqwDGbjN1WmIkcB4VAJkxRTd8Fvd8nU131JN5
+      RtO/frX1PrVEUQweIQFPKc2tbiIs43/jA+xxusJsSUNYb3dZTyrUWIXsPjR8Mukh
+      7iA5kiQ5H9aFkx7w1Y8lRw3OB3ri2WghO31HoiHi/HASS1Sgr3S7zUj/TTnUY9dz
+      ek3TIy28yrhpX9RW3qnObtW8OznVnWgnAgMBAAGjYzBhMA4GA1UdDwEB/wQEAwIB
+      BjAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBQTZQcbPdpLAlxwoFTauO6upJsT
+      gjAfBgNVHSMEGDAWgBQTZQcbPdpLAlxwoFTauO6upJsTgjANBgkqhkiG9w0BAQsF
+      AAOCAYEAjEMXInmq24o8/O/fAz8+1OlSTJw9tPEaltQMgGsSIT7oTOOjzVCZf4c8
+      yfwmkwjLD+F82cMEB+UKY4MCFLIy5fZwyeYjoqpMjFSyAIbGhZZU5hznP2RM65ka
+      hlW9d6wRp8QAIdfXkfMcIfx82uHMGBGWc79HBtg1z8a9b3HeGzV57265F4A4LzpN
+      XR4QfKPtO31Qe/qzHqWRuxAAVPtYcVxfj9w0jcnqU6126WrtZwQG1CwBcOrK9NCc
+      GM7wts4B2+s7Xg9cjRwWWkWrDN+l7ZOsBxJi6frLonFaA2Jj/Si1g68wIKW5QGLR
+      +TWl4a3QRNtOQpfoxkTCAMTChCJSOZ1GksaXDPuB26ZkOeucf5P9VzY4DMyr29QQ
+      Bu3G0FD9EjexQRWf4Vn1A/mJ9NpogIBlONc6OjMnHMomgFQelX0EcAZ2jgYiF9l/
+      So6yzQJF5zzaKY3UgwTXqyirjKfxAnX69KNcOUkbQsHsYGHHZefyMvxKJerC70V6
+      Z5ecdybK
+      -----END CERTIFICATE-----
+  syslog_configuration:
+    enabled: false
+resource-configuration:
   compilation:
-    max_in_flight: 1
     additional_networks: []
     additional_vm_extensions: []
     instance_type:
@@ -17,10 +132,8 @@ resource-config:
       lb:
         server_pools: []
       ns_groups: []
-      vif_type: null
     swap_as_percent_of_memory_size: automatic
   director:
-    max_in_flight: 1
     additional_networks: []
     additional_vm_extensions: []
     instance_type:
@@ -30,21 +143,10 @@ resource-config:
       lb:
         server_pools: []
       ns_groups: []
-      vif_type: null
     persistent_disk:
       name: "204800"
       size_mb: "204800"
     swap_as_percent_of_memory_size: automatic
-syslog-properties:
-  address: null
-  custom_rsyslog_configuration: null
-  enabled: false
-  environment: null
-  forward_debug_logs: false
-  permitted_peer: null
-  port: null
-  queue_size: null
-  ssl_ca_certificate: null
-  tls_enabled: false
-  transport_protocol: tcp
+vmextensions-configuration: []
+vmtypes-configuration: {}
 
