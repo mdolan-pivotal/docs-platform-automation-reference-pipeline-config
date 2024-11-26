@@ -1,0 +1,54 @@
+
+get-pai-and-pat: &get-pai-and-pat
+  - get: platform-automation-image
+    resource: platform-automation
+    params:
+      unpack: true
+      globs: ["*image*.tgz"]
+  - get: platform-automation-tasks
+    resource: platform-automation
+    params:
+      unpack: true
+      globs: ["*tasks*.zip"]
+
+jobs:
+  - name: scp-job
+    plan:
+      - get: configuration
+        trigger: false
+      - get: platform-automation-image
+        resource: platform-automation
+        params:
+          unpack: true
+          globs: ["*image*.tgz"]
+      - task: scp-task
+        image: platform-automation-image
+        file: configuration/tasks/scp-push.yml
+        input_mapping:
+          custom-tasks-repo: configuration
+          scp-files: configuration
+        params:
+          HOST_FQDN: pn50.diggity00.net          
+          HOST_PRIVATE_KEY: ((scp.private_key))
+          HOST_USERNAME: mdolan
+          HOST_PATH: /home/mdolan/Development/homelab/concourse-var-version
+          LOCAL_PATH: /var/version
+
+resource_types:
+- name: pivnet
+  type: docker-image
+  source:
+    repository: pivotalcf/pivnet-resource
+    tag: latest-final
+resources:
+  - name: platform-automation
+    type: pivnet
+    source:
+      product_slug: platform-automation
+      api_token: ((tile_config.pivnet_refresh_token))
+  - name: configuration
+    type: git
+    source:
+      uri: https://github.com/mdolan-pivotal/docs-platform-automation-reference-pipeline-config
+      branch: develop
+      private_key: ((scp.private_key))
