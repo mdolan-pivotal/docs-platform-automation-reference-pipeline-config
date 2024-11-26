@@ -1,7 +1,7 @@
 product-name: p-bosh
 network-properties:
   network:
-    name: vlan64
+    name: ((director_network))
   other_availability_zones: []
   singleton_availability_zone:
     name: az1
