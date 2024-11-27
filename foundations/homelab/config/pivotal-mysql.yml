@@ -173,13 +173,13 @@ errand-config:
   recreate-all-service-instances:
     post-deploy-state: false
   register-broker:
-    post-deploy-state: true
+    post-deploy-state: false
   smoke-tests:
-    post-deploy-state: true
+    post-deploy-state: false
   upgrade-all-service-instances:
-    post-deploy-state: true
+    post-deploy-state: false
   validate-before-upgrade-instances:
-    post-deploy-state: true
+    post-deploy-state: false
 syslog-properties:
   address: null
   custom_rsyslog_configuration: null
