@@ -793,7 +793,6 @@ jobs:
       ERRAND_NAME: deploy-autoscaler
       ENV_FILE: foundations/config/env.yml
       INSTANCE: backup_restore/first
-      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
   - task: deploy-notifications
     image: platform-automation-image
     file: platform-automation-tasks/tasks/run-bosh-errand.yml
@@ -972,7 +971,6 @@ jobs:
       PRODUCT_NAME: p-healthwatch2
       ERRAND_NAME: smoke-test
       ENV_FILE: foundations/config/env.yml
-      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
   - task: healthwatch-update-admin-password
     image: platform-automation-image
     file: platform-automation-tasks/tasks/run-bosh-errand.yml
@@ -982,7 +980,6 @@ jobs:
       PRODUCT_NAME: p-healthwatch2
       ERRAND_NAME: update-admin-password
       ENV_FILE: foundations/config/env.yml
-      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
   - task: healthwatch-exporter-smoke-text
     image: platform-automation-image
     file: platform-automation-tasks/tasks/run-bosh-errand.yml
@@ -992,7 +989,6 @@ jobs:
       PRODUCT_NAME: p-healthwatch2-pas-exporter
       ERRAND_NAME: smoke-test
       ENV_FILE: foundations/config/env.yml
-      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
 
 - name: apply-product-changes-for-mysql
   serial: true
@@ -1049,7 +1045,6 @@ jobs:
       PRODUCT_NAME: pivotal-mysql
       ERRAND_NAME: register-broker
       ENV_FILE: foundations/config/env.yml
-      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
   - task: mysql-smoke-tests
     image: platform-automation-image
     file: platform-automation-tasks/tasks/run-bosh-errand.yml
@@ -1059,7 +1054,6 @@ jobs:
       PRODUCT_NAME: pivotal-mysql
       ERRAND_NAME: smoke-tests
       ENV_FILE: foundations/config/env.yml
-      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
 
   # code_snippet run-bosh-errand-usage end
 #- name: collect-telemetry
