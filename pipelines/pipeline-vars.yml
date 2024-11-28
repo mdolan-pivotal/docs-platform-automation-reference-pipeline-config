@@ -1,5 +1,5 @@
 foundation: homelab
-docs-ref-pipeline-repo-uri: https://github.com/mdolan-pivotal/docs-platform-automation-reference-pipeline-config 
+docs-ref-pipeline-repo-uri: git@github.com:mdolan-pivotal/docs-platform-automation-reference-pipeline-config.git
 docs-ref-pipeline-repo-key:
   private_key: ((tile_config.scp_private_key))
 ops_manager_ssh_private_key: ((tile_config.scp_private_key))
