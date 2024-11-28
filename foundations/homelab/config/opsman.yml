@@ -12,6 +12,9 @@ opsman-configuration:
       insecure: 1
     ssh_public_key: ((tile_config.scp_private_key))
     disk_type: thin
+    private_ip: "'"
+    netmask: ""
+    dns: ""
     ntp: 192.168.64.1
     hostname: ((ops_manager.fqdn))
     network: dvVMNetwork
