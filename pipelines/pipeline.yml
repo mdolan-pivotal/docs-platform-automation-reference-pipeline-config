@@ -12,14 +12,18 @@ groups:
     - upgrade-opsman
     - download-upload-and-stage-healthwatch-pas-exporter
     - download-upload-and-stage-healthwatch
+    - download-upload-and-stage-mysql
     - download-upload-and-stage-tas
     - configure-healthwatch-pas-exporter
     - configure-healthwatch
+    - configure-mysql
     - configure-tas
     - apply-product-changes-for-tas
     - apply-product-changes-for-hw
+    - apply-product-changes-for-mysql
     - run-tas-errands
     - run-hw-errands
+    - run-mysql-errands
 #    - stage-configure-apply-telemetry
 #    - collect-telemetry
   name: reference-pipeline
@@ -230,7 +234,7 @@ jobs:
       vars: configuration
     params:
       OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
-      STATE_FILE: foundations/((foundation/state-((foundation)).yml
+      STATE_FILE: foundations/((foundation))/state/((foundation))-state.yml
       VARS_FILES: vars/foundations/((foundation))/vars/director.yml
     ensure: &put-state
       do:
@@ -243,7 +247,7 @@ jobs:
   - task: configure-authentication
     image: platform-automation-image
     file: platform-automation-tasks/tasks/configure-authentication.yml
-    attempts: 10
+    attempts: 20
     input_mapping:
       env: configuration
       config: configuration
@@ -304,6 +308,7 @@ jobs:
     image: platform-automation-image
     file: configuration/tasks/scp-push.yml
     input_mapping:
+      custom-tasks-repo: configuration
       scp-files: installation
     params:
       PUSH_PULL: push
@@ -380,18 +385,19 @@ jobs:
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
     <<: *prepare-image
-  - task: download-opsman-image
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/download-product.yml
-    input_mapping:
-      config: configuration
-      vars: configuration
-    params:
-      CONFIG_FILE: foundations/((foundation))/config/download-opsman.yml
-      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
-      SOURCE: pivnet
-    output_mapping:
-      downloaded-product: opsman-image
+  # this is really slow right now, so skipping
+  #- task: download-opsman-image
+  #  image: platform-automation-image
+  #  file: platform-automation-tasks/tasks/download-product.yml
+  #  input_mapping:
+  #    config: configuration
+  #    vars: configuration
+  #  params:
+  #    CONFIG_FILE: foundations/((foundation))/config/download-opsman.yml
+  #    VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
+  #    SOURCE: pivnet
+  #  output_mapping:
+  #    downloaded-product: opsman-image
   # code_snippet upgrade-opsman-usage start yaml
   - task: scp-installation
     image: platform-automation-image
@@ -589,6 +595,36 @@ jobs:
       params:
         ENV_FILE: foundations/config/env.yml
 
+- name: download-upload-and-stage-mysql
+  serial: true
+  plan:
+    - in_parallel:  *get-pai-and-pat
+    - get: configuration
+      passed: [ "upgrade-opsman" ]
+      trigger: true
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: download-healthwatch
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/download-pivotal-mysql.yml
+        VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
+        SOURCE: pivnet
+      output_mapping:
+        downloaded-product: healthwatch-pas-exporter
+    - task: upload-and-stage-healthwatch-pas-exporter
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      input_mapping:
+        product: healthwatch-pas-exporter
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+
 - name: configure-tas
   serial: true
   plan:
@@ -656,6 +692,28 @@ jobs:
         VARS_FILES: |
           vars/foundations/((foundation))/vars/director.yml
 
+- name: configure-mysql
+  serial: true
+  plan:
+    - in_parallel:  *get-pai-and-pat
+    - get: configuration
+      passed: ["download-upload-and-stage-mysql"]
+      trigger: true
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-mysql
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/pivotal-mysql.yml
+        ENV_FILE: foundations/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/director.yml
+
 - name: apply-product-changes-for-tas
   serial: true
   plan:
@@ -665,6 +723,7 @@ jobs:
     - configure-tas
     - configure-healthwatch
     - configure-healthwatch-pas-exporter
+    - configure-mysql
     trigger: true
   - task: prepare-tasks-with-secrets
     <<: *prepare-tasks-with-secrets
@@ -935,6 +994,73 @@ jobs:
       ENV_FILE: foundations/config/env.yml
       OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
 
+- name: apply-product-changes-for-mysql
+  serial: true
+  plan:
+  - in_parallel:  *get-pai-and-pat
+  - get: configuration
+    passed:
+    - configure-mysql
+    - apply-product-changes-for-hw
+    trigger: true
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  # code_snippet pre-deploy-check-usage start yaml
+  - task: pre-deploy-check
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/pre-deploy-check.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  # code_snippet pre-deploy-check-usage end
+  # code_snippet apply-changes-usage start yaml
+  - task: apply-product-changes
+    attempts: 3
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/apply-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      SELECTIVE_DEPLOY_PRODUCTS: pivotal-mysql
+
+- name: run-mysql-errands
+  serial: true
+  plan:
+  - in_parallel:  *get-pai-and-pat
+  - get: configuration
+    passed:
+    - apply-product-changes-for-mysql
+    trigger: true
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  # code_snippet run-bosh-errand-usage start yaml
+  - task: mysql-register-broker
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: pivotal-mysql
+      ERRAND_NAME: register-broker
+      ENV_FILE: foundations/config/env.yml
+      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
+  - task: mysql-smoke-tests
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/run-bosh-errand.yml
+    input_mapping:
+      env: configuration
+    params:
+      PRODUCT_NAME: pivotal-mysql
+      ERRAND_NAME: smoke-tests
+      ENV_FILE: foundations/config/env.yml
+      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager.ssh_private_key))
+
   # code_snippet run-bosh-errand-usage end
 #- name: collect-telemetry
 #  serial: true
@@ -1046,7 +1172,7 @@ jobs:
         config: configuration
       params:
         OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
-        STATE_FILE: state-((foundation)).yml
+        STATE_FILE: foundations/((foundation))/state/((foundation))-state.yml
         VARS_FILES: config/foundations/((foundation))/vars/director.yml
       ensure:
         do:
