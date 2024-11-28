@@ -234,7 +234,7 @@ jobs:
       vars: configuration
     params:
       OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
-      STATE_FILE: foundations/((foundation))/state/((foundation))-state.yml
+      STATE_FILE: state-((foundation)).yml
       VARS_FILES: vars/foundations/((foundation))/vars/director.yml
     ensure: &put-state
       do:
@@ -1166,7 +1166,7 @@ jobs:
         config: configuration
       params:
         OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
-        STATE_FILE: foundations/((foundation))/state/((foundation))-state.yml
+        STATE_FILE: state-((foundation)).yml
         VARS_FILES: config/foundations/((foundation))/vars/director.yml
       ensure:
         do:
