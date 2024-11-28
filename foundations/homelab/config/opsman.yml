@@ -17,7 +17,7 @@ opsman-configuration:
     dns: 192.168.64.1
     gateway: 192.168.64.1
     ntp: 192.168.64.1
-    hostname: ((ops_manager.fqdn))
+    hostname: ops-manager
     network: dvVMNetwork
     memory: 8
     cpu: 4
